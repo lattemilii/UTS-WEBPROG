@@ -1,37 +1,33 @@
 <?php
 session_start();
-
-$users = [
-    'admin' => ['email' => 'Yaqub.Salamander@admin.umn.ac.id', 'password' => 'admin123'],
-    'dosen' => ['email' => 'Djawa.Tsunda@lecturer.umn.ac.id', 'password' => 'dosen123'],
-    'mahasiswa' => ['email' => 'Tjan.Malaka@student.umn.ac.id', 'password' => 'mahasiswa123']
-];
-
-function getRoleByEmail($email) {
-    $domain = explode('@', $email)[1];
-    if ($domain == 'admin.umn.ac.id') {
-        return 'admin';
-    } elseif ($domain == 'lecturer.umn.ac.id') {
-        return 'dosen';
-    } elseif ($domain == 'student.umn.ac.id') {
-        return 'mahasiswa';
-    }
-    return null;
-}
+require '../db.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
-    $role = getRoleByEmail($email);
 
-    if ($role && isset($users[$role]) && $users[$role]['email'] === $email && $users[$role]['password'] === $password) {
-        $_SESSION['role'] = $role;
-        $_SESSION['email'] = $email;
-        header("Location: ../MainMenu/MainMenu.php");
-        exit();
+    $stmt = $con->prepare("SELECT password, role FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $stmt->store_result();
+    
+    if ($stmt->num_rows > 0) {
+        $stmt->bind_result($dbPassword, $dbRole);
+        $stmt->fetch();
+        
+        if (password_verify($password, $dbPassword)) {
+            $_SESSION['role'] = $dbRole;
+            $_SESSION['email'] = $email;
+            header("Location: ../MainMenu/MainMenu.php");
+            exit();
+        } else {
+            $error = "Login gagal! Password salah.";
+        }
     } else {
         $error = "Login gagal! Periksa kembali email dan password Anda.";
     }
+
+    $stmt->close();
 }
 ?>
 
