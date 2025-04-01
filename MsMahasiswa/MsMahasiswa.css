@@ -72,7 +72,7 @@ td button:hover {
     display: block;
 }
 
-.form-group input {
+.form-group input{
     width: calc(100% - 2px);
     padding: 12px;
     margin-top: 7.5px;

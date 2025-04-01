@@ -1,36 +1,41 @@
 <?php
 session_start();
+require '../db.php';
 
 if (!isset($_SESSION['role']) || !isset($_SESSION['email'])) {
-    header("Location: ../LoginPage/UserSelection.php");
+    header("Location: ../LoginPage/Login.php");
     exit();
 }
 
 $role = $_SESSION['role'];
 $email = $_SESSION['email'];
+$jadwal = [];
 
-$dsn = 'mysql:host=localhost;dbname=myumn';
-$username = 'root';
-$password = '';
-
-try {
-    $db = new PDO($dsn, $username, $password);
-} catch (PDOException $e) {
-    echo 'Connection failed: ' . $e->getMessage();
-    exit();
+if (!$con) {
+    die("Database connection failed: " . mysqli_connect_error());
 }
 
 if ($role == 'dosen') {
-    $stmt = $db->prepare("SELECT * FROM krs WHERE nik_dosen = ?");
-    $stmt->execute([$email]);
-    $jadwal = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $sql = "SELECT * FROM v_krs_dosen WHERE NIK_Dosen = ?";
 } elseif ($role == 'mahasiswa') {
-    $stmt = $db->prepare("SELECT * FROM krs WHERE nim_mahasiswa = ?");
-    $stmt->execute([$email]);
-    $jadwal = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $sql = "SELECT * FROM v_krs_mahasiswa WHERE NIM_Mahasiswa = ?";
 } else {
-    $jadwal = [];
+    header("Location: ../LoginPage/Login.php");
+    exit();
 }
+
+$stmt = $con->prepare($sql);
+if (!$stmt) {
+    die("SQL Error: " . $con->error);
+}
+
+$stmt->bind_param("s", $email);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows > 0) {
+    $jadwal = $result->fetch_all(MYSQLI_ASSOC);
+}
+$stmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -52,6 +57,7 @@ if ($role == 'dosen') {
                     <th>Nama Matkul</th>
                     <th>SKS</th>
                     <th>Hari</th>
+                    <th>Jam</th>
                     <th>Ruangan</th>
                     <?php if ($role == 'mahasiswa'): ?>
                         <th>Dosen Pengajar</th>
@@ -59,18 +65,25 @@ if ($role == 'dosen') {
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($jadwal as $j): ?>
+                <?php if (empty($jadwal)): ?>
                     <tr>
-                        <td><?php echo htmlspecialchars($j['kode_matkul']); ?></td>
-                        <td><?php echo htmlspecialchars($j['nama_matkul']); ?></td>
-                        <td><?php echo htmlspecialchars($j['sks']); ?></td>
-                        <td><?php echo htmlspecialchars($j['hari_matkul']); ?></td>
-                        <td><?php echo htmlspecialchars($j['ruangan']); ?></td>
-                        <?php if ($role == 'mahasiswa'): ?>
-                            <td><?php echo htmlspecialchars($j['nik_dosen']); ?></td>
-                        <?php endif; ?>
+                        <td colspan="<?= $role == 'mahasiswa' ? 7 : 6 ?>" style="text-align: center;">Tidak ada data</td>
                     </tr>
-                <?php endforeach; ?>
+                <?php else: ?>
+                    <?php foreach ($jadwal as $j): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($j['Kode_Matkul']); ?></td>
+                            <td><?= htmlspecialchars($j['Nama_Matkul']); ?></td>
+                            <td><?= htmlspecialchars($j['sks']); ?></td>
+                            <td><?= htmlspecialchars($j['Hari_Matkul']); ?></td>
+                            <td><?= htmlspecialchars($j['Jam_Matkul']); ?></td>
+                            <td><?= htmlspecialchars($j['Ruangan']); ?></td>
+                            <?php if ($role == 'mahasiswa' && isset($j['Nama_Dosen'])): ?>
+                                <td><?= htmlspecialchars($j['Nama_Dosen']); ?></td>
+                            <?php endif; ?>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
@@ -78,3 +91,4 @@ if ($role == 'dosen') {
 </div>
 </body>
 </html>
+

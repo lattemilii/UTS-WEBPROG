@@ -1,53 +1,25 @@
 <?php
 session_start();
-
+require '../db.php'; 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../LoginPage/UserSelection.php");
-    exit();
-}
-
-$dsn = 'mysql:host=localhost;dbname=myumn';
-$username = 'root';
-$password = '';
-
-try {
-    $db = new PDO($dsn, $username, $password);
-} catch (PDOException $e) {
-    echo 'Connection failed: ' . $e->getMessage();
+    header("Location: ../LoginPage/Login.php");
     exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (isset($_POST['add'])) {
-        $nim = $_POST['nim'];
-        $nama = $_POST['nama'];
-        $tahun_masuk = $_POST['tahun_masuk'];
-        $alamat = $_POST['alamat'];
-        $telp = $_POST['telp'];
-        $user_input = $_SESSION['email'];
-        $tanggal_input = date('Y-m-d H:i:s');
-
-        $stmt = $db->prepare("INSERT INTO mahasiswa (nim, nama, tahun_masuk, alamat, telp, user_input, tanggal_input) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$nim, $nama, $tahun_masuk, $alamat, $telp, $user_input, $tanggal_input]);
-    } elseif (isset($_POST['edit'])) {
-        $id = $_POST['id'];
-        $nim = $_POST['nim'];
-        $nama = $_POST['nama'];
-        $tahun_masuk = $_POST['tahun_masuk'];
-        $alamat = $_POST['alamat'];
-        $telp = $_POST['telp'];
-
-        $stmt = $db->prepare("UPDATE mahasiswa SET nim = ?, nama = ?, tahun_masuk = ?, alamat = ?, telp = ? WHERE id = ?");
-        $stmt->execute([$nim, $nama, $tahun_masuk, $alamat, $telp, $id]);
-    } elseif (isset($_POST['delete'])) {
-        $id = $_POST['id'];
-
-        $stmt = $db->prepare("DELETE FROM mahasiswa WHERE id = ?");
-        $stmt->execute([$id]);
+    $nim = $_POST['NIM'] ??'';
+    $nama = $_POST['Nama'] ?? '';
+    $tahun_masuk = $_POST['Tahun_Masuk'] ?? '';
+    $dob = $_POST['dob'] ?? '';
+    $prodi = $_POST['Prodi'] ?? '';
+    $alamat = $_POST['Alamat'] ?? '';
+    $telp = $_POST['Telp'] ?? '';
+    $user_input = $_SESSION['email'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $tanggal_input = date('Y-m-d H:i:s');
     }
-}
-
-$mahasiswa = $db->query("SELECT * FROM mahasiswa")->fetchAll(PDO::FETCH_ASSOC);
+$result = $con->query("SELECT * FROM mahasiswa");
+$mahasiswa = $result->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -68,8 +40,11 @@ $mahasiswa = $db->query("SELECT * FROM mahasiswa")->fetchAll(PDO::FETCH_ASSOC);
                     <th>NIM</th>
                     <th>Nama</th>
                     <th>Tahun Masuk</th>
+                    <th>Prodi</th>
+                    <th>DOB</th>
                     <th>Alamat</th>
                     <th>Telp</th>
+                    <th>Email</th>
                     <th>User Input</th>
                     <th>Tanggal Input</th>
                     <th>Aksi</th>
@@ -78,59 +53,26 @@ $mahasiswa = $db->query("SELECT * FROM mahasiswa")->fetchAll(PDO::FETCH_ASSOC);
             <tbody>
                 <?php foreach ($mahasiswa as $m): ?>
                     <tr>
-                        <td><?php echo htmlspecialchars($m['nim']); ?></td>
-                        <td><?php echo htmlspecialchars($m['nama']); ?></td>
-                        <td><?php echo htmlspecialchars($m['tahun_masuk']); ?></td>
-                        <td><?php echo htmlspecialchars($m['alamat']); ?></td>
-                        <td><?php echo htmlspecialchars($m['telp']); ?></td>
-                        <td><?php echo htmlspecialchars($m['user_input']); ?></td>
-                        <td><?php echo htmlspecialchars($m['tanggal_input']); ?></td>
+                        <td><?php echo htmlspecialchars($m['NIM']); ?></td>
+                        <td><?php echo htmlspecialchars($m['Nama']); ?></td>
+                        <td><?php echo htmlspecialchars($m['Tahun_Masuk']); ?></td>
+                        <td><?php echo htmlspecialchars($m['Prodi']); ?></td>
+                        <td><?php echo htmlspecialchars($m['dob']); ?></td>
+                        <td><?php echo htmlspecialchars($m['Alamat']); ?></td>
+                        <td><?php echo htmlspecialchars($m['Telp']); ?></td>
+                        <td><?php echo htmlspecialchars($m['email']); ?></td>
+                        <td><?php echo htmlspecialchars($m['User_Input']); ?></td>
+                        <td><?php echo htmlspecialchars($m['Tanggal_Input']); ?></td>
                         <td>
-                            <button onclick="editMahasiswa(<?php echo htmlspecialchars(json_encode($m)); ?>)">Edit</button>
+                        <button onclick="location.href='EditMahasiswa.php?NIM=<?php echo $m['NIM']; ?>'">Edit</button>
                         </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
     </div>
-    <form action="MsMahasiswa.php" method="post">
-        <input type="hidden" name="id" id="id">
-        <div class="form-group">
-            <label for="nim">NIM:</label>
-            <input type="text" id="nim" name="nim" required>
-        </div>
-        <div class="form-group">
-            <label for="nama">Nama:</label>
-            <input type="text" id="nama" name="nama" required>
-        </div>
-        <div class="form-group">
-            <label for="tahun_masuk">Tahun Masuk:</label>
-            <input type="text" id="tahun_masuk" name="tahun_masuk" required>
-        </div>
-        <div class="form-group">
-            <label for="alamat">Alamat:</label>
-            <input type="text" id="alamat" name="alamat" required>
-        </div>
-        <div class="form-group">
-            <label for="telp">Telp:</label>
-            <input type="text" id="telp" name="telp" required>
-        </div>
-        <button type="submit" name="add" class="btn">Tambah</button>
-        <button type="submit" name="edit" class="btn">Edit</button>
-        <button type="submit" name="delete" class="btn">Hapus</button>
-    </form>
-    <button class="btn" onclick="window.location.href='../MainMenu/MainMenu.php'">Kembali</button>
+    <button onclick="location.href='TambahMahasiswa.php'" class="btn">Tambah Mahasiswa</button>
+    <button onclick="location.href='../MainMenu/MainMenu.php'"class="btn" >Kembali</button>
 </div>
-
-<script>
-function editMahasiswa(mahasiswa) {
-    document.getElementById('id').value = mahasiswa.id;
-    document.getElementById('nim').value = mahasiswa.nim;
-    document.getElementById('nama').value = mahasiswa.nama;
-    document.getElementById('tahun_masuk').value = mahasiswa.tahun_masuk;
-    document.getElementById('alamat').value = mahasiswa.alamat;
-    document.getElementById('telp').value = mahasiswa.telp;
-}
-</script>
 </body>
 </html>

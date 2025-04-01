@@ -1,5 +1,6 @@
 <?php
 session_start();
+require '../db.php';
 
 if (!isset($_SESSION['role']) || !isset($_SESSION['email'])) {
     header("Location: ../LoginPage/Login.php");
@@ -22,7 +23,8 @@ $menus = [
     'mahasiswa' => ['Report']
 ];
 
-$userMenus = $menus[$role] ?? [];
+$userMenus = isset($menus[$role]) ? $menus[$role] : [];
+
 ?>
 
 

@@ -1,53 +1,25 @@
 <?php
 session_start();
+require '../db.php';
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../LoginPage/UserSelection.php");
-    exit();
-}
-
-$dsn = 'mysql:host=localhost;dbname=myumn';
-$username = 'root';
-$password = '';
-
-try {
-    $db = new PDO($dsn, $username, $password);
-} catch (PDOException $e) {
-    echo 'Connection failed: ' . $e->getMessage();
+    header("Location: ../LoginPage/Login.php");
     exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (isset($_POST['add'])) {
-        $kode_matkul = $_POST['kode_matkul'];
-        $nik_dosen = $_POST['nik_dosen'];
-        $nim_mahasiswa = $_POST['nim_mahasiswa'];
-        $hari_matkul = $_POST['hari_matkul'];
-        $ruangan = $_POST['ruangan'];
-        $user_input = $_SESSION['email'];
+        $kode_matkul = $_POST['Kode_Matkul'] ?? '';
+        $nik_dosen = $_POST['NIK_Dosen'] ?? '';
+        $nim_mahasiswa = $_POST['NIM_Mahasiswa'] ?? '';
+        $hari_matkul = $_POST['Hari_Matkul'] ?? '';
+        $jam_matkul = $_POST['Jam_Matkul'] ?? '';
+        $ruangan = $_POST['Ruangan'] ?? '';
+        $user_input = $_SESSION['email'] ?? '';
         $tanggal_input = date('Y-m-d H:i:s');
-
-        $stmt = $db->prepare("INSERT INTO krs (kode_matkul, nik_dosen, nim_mahasiswa, hari_matkul, ruangan, user_input, tanggal_input) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$kode_matkul, $nik_dosen, $nim_mahasiswa, $hari_matkul, $ruangan, $user_input, $tanggal_input]);
-    } elseif (isset($_POST['edit'])) {
-        $id = $_POST['id'];
-        $kode_matkul = $_POST['kode_matkul'];
-        $nik_dosen = $_POST['nik_dosen'];
-        $nim_mahasiswa = $_POST['nim_mahasiswa'];
-        $hari_matkul = $_POST['hari_matkul'];
-        $ruangan = $_POST['ruangan'];
-
-        $stmt = $db->prepare("UPDATE krs SET kode_matkul = ?, nik_dosen = ?, nim_mahasiswa = ?, hari_matkul = ?, ruangan = ? WHERE id = ?");
-        $stmt->execute([$kode_matkul, $nik_dosen, $nim_mahasiswa, $hari_matkul, $ruangan, $id]);
-    } elseif (isset($_POST['delete'])) {
-        $id = $_POST['id'];
-
-        $stmt = $db->prepare("DELETE FROM krs WHERE id = ?");
-        $stmt->execute([$id]);
-    }
 }
 
-$krs = $db->query("SELECT * FROM krs")->fetchAll(PDO::FETCH_ASSOC);
+$result = $con->query("SELECT * FROM krs");
+$krs = $result->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -65,12 +37,12 @@ $krs = $db->query("SELECT * FROM krs")->fetchAll(PDO::FETCH_ASSOC);
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Kode Matkul</th>
                     <th>NIK Dosen</th>
                     <th>NIM Mahasiswa</th>
                     <th>Hari Matkul</th>
                     <th>Ruangan</th>
+                    <th>Jam</th>
                     <th>User Input</th>
                     <th>Tanggal Input</th>
                     <th>Aksi</th>
@@ -79,60 +51,25 @@ $krs = $db->query("SELECT * FROM krs")->fetchAll(PDO::FETCH_ASSOC);
             <tbody>
                 <?php foreach ($krs as $k): ?>
                     <tr>
-                        <td><?php echo htmlspecialchars($k['id']); ?></td>
-                        <td><?php echo htmlspecialchars($k['kode_matkul']); ?></td>
-                        <td><?php echo htmlspecialchars($k['nik_dosen']); ?></td>
-                        <td><?php echo htmlspecialchars($k['nim_mahasiswa']); ?></td>
-                        <td><?php echo htmlspecialchars($k['hari_matkul']); ?></td>
-                        <td><?php echo htmlspecialchars($k['ruangan']); ?></td>
-                        <td><?php echo htmlspecialchars($k['user_input']); ?></td>
-                        <td><?php echo htmlspecialchars($k['tanggal_input']); ?></td>
+                        <td><?php echo htmlspecialchars($k['Kode_Matkul']); ?></td>
+                        <td><?php echo htmlspecialchars($k['NIK_Dosen']); ?></td>
+                        <td><?php echo htmlspecialchars($k['NIM_Mahasiswa']); ?></td>
+                        <td><?php echo htmlspecialchars($k['Hari_Matkul']); ?></td>
+                        <td><?php echo htmlspecialchars($k['Ruangan']); ?></td>
+                        <td><?php echo htmlspecialchars($k['Jam_Matkul']); ?></td>
+                        <td><?php echo htmlspecialchars($k['User_Input']); ?></td>
+                        <td><?php echo htmlspecialchars($k['Tanggal_Input']); ?></td>
                         <td>
-                            <button onclick="editKRS(<?php echo htmlspecialchars(json_encode($k)); ?>)">Edit</button>
+                            <button onclick="location.href='EditKRS.php?Kode_Matkul=<?php echo $k['Kode_Matkul']; ?>'">Edit</button>
                         </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
-    </div>
-    <form action="MsKRS.php" method="post">
-        <input type="hidden" name="id" id="id">
-        <div class="form-group">
-            <label for="kode_matkul">Kode Matkul:</label>
-            <input type="text" id="kode_matkul" name="kode_matkul" required>
-        </div>
-        <div class="form-group">
-            <label for="nik_dosen">NIK Dosen:</label>
-            <input type="text" id="nik_dosen" name="nik_dosen" required>
-        </div>
-        <div class="form-group">
-            <label for="nim_mahasiswa">NIM Mahasiswa:</label>
-            <input type="text" id="nim_mahasiswa" name="nim_mahasiswa" required>
-        </div>
-        <div class="form-group">
-            <label for="hari_matkul">Hari Matkul:</label>
-            <input type="text" id="hari_matkul" name="hari_matkul" required>
-        </div>
-        <div class="form-group">
-            <label for="ruangan">Ruangan:</label>
-            <input type="text" id="ruangan" name="ruangan" required>
-        </div>
-        <button type="submit" name="add" class="btn">Tambah</button>
-        <button type="submit" name="edit" class="btn">Edit</button>
-        <button type="submit" name="delete" class="btn">Hapus</button>
-    </form>
-    <button class="btn" onclick="window.location.href='../MainMenu/MainMenu.php'">Kembali</button>
-</div>
-
-<script>
-function editKRS(krs) {
-    document.getElementById('id').value = krs.id;
-    document.getElementById('kode_matkul').value = krs.kode_matkul;
-    document.getElementById('nik_dosen').value = krs.nik_dosen;
-    document.getElementById('nim_mahasiswa').value = krs.nim_mahasiswa;
-    document.getElementById('hari_matkul').value = krs.hari_matkul;
-    document.getElementById('ruangan').value = krs.ruangan;
-}
-</script>
+    </div>    
+    <button onclick="location.href='TambahKRS.php'" class="btn">Tambah KRS</button>
+    <button onclick="location.href='../MainMenu/MainMenu.php'"class="btn" >Kembali</button>   
 </body>
 </html>
+
+
