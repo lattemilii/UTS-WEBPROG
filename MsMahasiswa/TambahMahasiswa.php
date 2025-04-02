@@ -6,8 +6,10 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
+$error = '';
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $nim = $_POST['NIM'] ??'';
+    $nim = $_POST['NIM'] ?? '';
     $nama = $_POST['Nama'] ?? '';
     $tahun_masuk = $_POST['Tahun_Masuk'] ?? '';
     $dob = $_POST['dob'] ?? '';
@@ -20,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $password = str_replace('-', '', $dob);
     $hpass = password_hash($password, PASSWORD_DEFAULT);
 
-    function generateEmail($nama, $con){
+    function generateEmail($nama, $con) {
         $new_email = strtolower(str_replace(' ', '.', $nama)) . '@student.umn.ac.id';
         $email = $new_email;
         $counter = 1;
@@ -54,26 +56,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $cek->store_result();
     $result = $cek->num_rows;
 
-    //insert to users
+    
     if ($result == 0) {
         $insert = $con->prepare("INSERT INTO users (email, password, role, NIM) VALUES (?, ?, 'mahasiswa', ?)");
         $insert->bind_param("sss", $email, $hpass, $nim);
-        if($insert->execute()) {
-            echo "Data Berhasil Masuk";
-        } else {
-            echo "Data gagal masuk " . $insert->error;
+        if (!$insert->execute()) {
+            $error = "Data gagal masuk ke tabel users: " . $insert->error;
         }
-    }  
-
-    //insert to mahasiswa
-    $stmt = $con->prepare("INSERT INTO mahasiswa (NIM, Nama, Prodi, Tahun_Masuk, dob, Alamat, Telp, email, User_Input, Tanggal_Input) VALUES (?,?,?,?,?,?,?,?,?,?)");
-    $stmt->bind_param("ssssssssss", $nim, $nama, $prodi, $tahun_masuk, $dob, $alamat, $telp, $email, $user_input, $tanggal_input);
-    if($stmt->execute()) {
-        header("Location: MsMahasiswa.php");
     } else {
-        echo "Error: " . $stmt->error;
+        $error = "NIM sudah terdaftar.";
     }
-    $stmt->close();
+
+    
+    if (empty($error)) {
+        $stmt = $con->prepare("INSERT INTO mahasiswa (NIM, Nama, Prodi, Tahun_Masuk, dob, Alamat, Telp, email, User_Input, Tanggal_Input) VALUES (?,?,?,?,?,?,?,?,?,?)");
+        $stmt->bind_param("ssssssssss", $nim, $nama, $prodi, $tahun_masuk, $dob, $alamat, $telp, $email, $user_input, $tanggal_input);
+        if (!$stmt->execute()) {
+            $error = "Data gagal masuk ke tabel mahasiswa: " . $stmt->error;
+        } else {
+            header("Location: MsMahasiswa.php");
+            exit();
+        }
+        $stmt->close();
+    }
 }
 ?>
 
@@ -88,6 +93,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body>
     <div class="container">
         <h1>Tambah Mahasiswa</h1>
+        <?php if (!empty($error)): ?>
+            <p class="error-message"><?php echo htmlspecialchars($error); ?></p>
+        <?php endif; ?>
         <form method="POST" action="TambahMahasiswa.php">
             <div class="form-group">
                 <label for="nim">NIM:</label>
@@ -137,5 +145,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 </body>
 </html>
-
-

@@ -7,19 +7,21 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        $kode_matkul = $_POST['Kode_Matkul'] ?? '';
-        $nik_dosen = $_POST['NIK_Dosen'] ?? '';
-        $nim_mahasiswa = $_POST['NIM_Mahasiswa'] ?? '';
-        $hari_matkul = $_POST['Hari_Matkul'] ?? '';
-        $jam_matkul = $_POST['Jam_Matkul'] ?? '';
-        $ruangan = $_POST['Ruangan'] ?? '';
-        $user_input = $_SESSION['email'] ?? '';
-        $tanggal_input = date('Y-m-d H:i:s');
-}
 
-$result = $con->query("SELECT * FROM krs");
+$result = $con->query("
+    SELECT krs.*, mata_kuliah.SKS 
+    FROM krs 
+    JOIN mata_kuliah ON krs.Kode_Matkul = mata_kuliah.Kode_Matkul
+");
 $krs = $result->fetch_all(MYSQLI_ASSOC);
+
+
+function calculateTimeRange($startTime, $sks) {
+    $start = new DateTime($startTime);
+    $end = clone $start;
+    $end->modify('+' . ($sks * 1) . ' hours');
+    return $start->format('H:i:s') . '-' . $end->format('H:i:s');
+}
 ?>
 
 <!DOCTYPE html>
@@ -56,7 +58,11 @@ $krs = $result->fetch_all(MYSQLI_ASSOC);
                         <td><?php echo htmlspecialchars($k['NIM_Mahasiswa']); ?></td>
                         <td><?php echo htmlspecialchars($k['Hari_Matkul']); ?></td>
                         <td><?php echo htmlspecialchars($k['Ruangan']); ?></td>
-                        <td><?php echo htmlspecialchars($k['Jam_Matkul']); ?></td>
+                        <td>
+                            <?php 
+                                echo calculateTimeRange($k['Jam_Matkul'], $k['SKS']); 
+                            ?>
+                        </td>
                         <td><?php echo htmlspecialchars($k['User_Input']); ?></td>
                         <td><?php echo htmlspecialchars($k['Tanggal_Input']); ?></td>
                         <td>
@@ -68,8 +74,7 @@ $krs = $result->fetch_all(MYSQLI_ASSOC);
         </table>
     </div>    
     <button onclick="location.href='TambahKRS.php'" class="btn">Tambah KRS</button>
-    <button onclick="location.href='../MainMenu/MainMenu.php'"class="btn" >Kembali</button>   
+    <button onclick="location.href='../MainMenu/MainMenu.php'" class="btn">Kembali</button>   
+</div>
 </body>
 </html>
-
-

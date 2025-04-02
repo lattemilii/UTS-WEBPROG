@@ -73,12 +73,11 @@ td button:hover {
 }
 
 .form-group input {
-    width: calc(100% - 2px);
+    width: 100%;
     padding: 12px;
     margin-top: 7.5px;
     border: 1px solid #ccc;
     border-radius: 6px;
-    box-sizing: border-box;
 }
 
 .btn {
@@ -95,4 +94,11 @@ td button:hover {
 
 .btn:hover {
     background-color: #0d2a5a;
+}
+
+.error-message {
+    color: red;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 15px;
 }

@@ -7,6 +7,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
+$error = '';
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $kode_matkul = $_POST['Kode_Matkul'] ?? '';
     $nik_dosen = $_POST['NIK_Dosen'] ?? '';
@@ -17,22 +19,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $user_input = $_SESSION['email'] ?? '';
     $tanggal_input = date('Y-m-d H:i:s');
 
-    $cek_ruangan = $con->prepare("SELECT 1 FROM krs WHERE Ruangan = ? AND Hari_Matkul = ? AND Jam_Matkul = ?");
-    $cek_ruangan->bind_param("sss", $ruangan, $hari_matkul, $jam_matkul);
-    $cek_ruangan->execute();
-    $cek_ruangan->store_result();
-    if ($cek_ruangan->num_rows > 0) {
-        header("Location: TambahKRS.php?error=Ruangan sudah digunakan di hari dan jam yang sama");
-        exit();
-    }
-
     $cek_matkul = $con->prepare("SELECT 1 FROM mata_kuliah WHERE Kode_Matkul = ?");
     $cek_matkul->bind_param("s", $kode_matkul);
     $cek_matkul->execute();
     $cek_matkul->store_result();
     if ($cek_matkul->num_rows == 0) {
-        header("Location: TambahKRS.php?error=Kode mata kuliah tidak ditemukan");
-        exit();
+        $error = "Kode mata kuliah tidak ditemukan.";
     }
 
     $cek_dosen = $con->prepare("SELECT 1 FROM dosen WHERE NIK = ?");
@@ -40,8 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $cek_dosen->execute();
     $cek_dosen->store_result();
     if ($cek_dosen->num_rows == 0) {
-        header("Location: TambahKRS.php?error=NIK dosen tidak ditemukan");
-        exit();
+        $error = "NIK dosen tidak ditemukan.";
     }
 
     $cek_mahasiswa = $con->prepare("SELECT 1 FROM mahasiswa WHERE NIM = ?");
@@ -49,47 +40,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $cek_mahasiswa->execute();
     $cek_mahasiswa->store_result();
     if ($cek_mahasiswa->num_rows == 0) {
-        header("Location: TambahKRS.php?error=NIM mahasiswa tidak ditemukan");
-        exit();
+        $error = "NIM mahasiswa tidak ditemukan.";
     }
 
-    $cek_krs = $con->prepare("SELECT 1 FROM krs WHERE Kode_Matkul = ? AND NIM_Mahasiswa = ?");
-    $cek_krs->bind_param("ss", $kode_matkul, $nim_mahasiswa);
-    $cek_krs->execute();
-    $cek_krs->store_result();
-    if ($cek_krs->num_rows > 0) {
-        header("Location: TambahKRS.php?error=Mahasiswa sudah mengambil mata kuliah ini");
-        exit();
-    }
-
-    $cek_dosen_matkul = $con->prepare("SELECT NIK_Dosen FROM krs WHERE Kode_Matkul = ?");
-    $cek_dosen_matkul->bind_param("s", $kode_matkul);
-    $cek_dosen_matkul->execute();
-    $cek_dosen_matkul->bind_result($existing_nik_dosen);
-    $cek_dosen_matkul->fetch();
-    $cek_dosen_matkul->close();
-    
-    if ($existing_nik_dosen && $existing_nik_dosen !== $nik_dosen) {
-        header("Location: TambahKRS.php?error=Mata kuliah sudah diajar oleh dosen lain");
-        exit();
-    }
-
-    $cek_jam_dosen = $con->prepare("SELECT 1 FROM krs WHERE NIK_Dosen = ? AND Hari_Matkul = ? AND Jam_Matkul = ?");
-    $cek_jam_dosen->bind_param("sss", $nik_dosen, $hari_matkul, $jam_matkul);
-    $cek_jam_dosen->execute();
-    $cek_jam_dosen->store_result();
-    if ($cek_jam_dosen->num_rows > 0) {
-        header("Location: TambahKRS.php?error=Dosen sudah mengajar mata kuliah lain di jam yang sama");
-        exit();
-    }
-
-    
-    $insert = $con->prepare("INSERT INTO krs (Kode_Matkul, NIK_Dosen, NIM_Mahasiswa, Hari_Matkul, Jam_Matkul, Ruangan, User_Input, Tanggal_Input) VALUES (?,?,?,?,?,?,?,?)");
-    $insert->bind_param("ssssssss", $kode_matkul, $nik_dosen, $nim_mahasiswa, $hari_matkul, $jam_matkul, $ruangan, $user_input, $tanggal_input);
-    if ($insert->execute()) {
-        header("Location: MsKRS.php");
-    } else {
-        echo "Data gagal masuk " . $insert->error;
+    if (empty($error)) {
+        $insert = $con->prepare("INSERT INTO krs (Kode_Matkul, NIK_Dosen, NIM_Mahasiswa, Hari_Matkul, Jam_Matkul, Ruangan, User_Input, Tanggal_Input) VALUES (?,?,?,?,?,?,?,?)");
+        $insert->bind_param("ssssssss", $kode_matkul, $nik_dosen, $nim_mahasiswa, $hari_matkul, $jam_matkul, $ruangan, $user_input, $tanggal_input);
+        if ($insert->execute()) {
+            header("Location: MsKRS.php");
+            exit();
+        } else {
+            $error = "Data gagal masuk: " . $insert->error;
+        }
     }
 }
 ?>
@@ -105,6 +67,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body>
     <div class="container">
         <h1>Tambah KRS</h1>
+        <?php if (!empty($error)): ?>
+            <p class="error-message"><?php echo htmlspecialchars($error); ?></p>
+        <?php endif; ?>
         <form action="TambahKRS.php" method="post">
             <div class="form-group">
                 <label for="kode_matkul">Kode Matkul:</label>
@@ -144,4 +109,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 </body>
 </html>
-

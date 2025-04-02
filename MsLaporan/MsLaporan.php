@@ -16,9 +16,9 @@ if (!$con) {
 }
 
 if ($role == 'dosen') {
-    $sql = "SELECT * FROM v_krs_dosen WHERE NIK_Dosen = ?";
+    $sql = "SELECT * FROM v_krs_dosen WHERE Email_Dosen = ?";
 } elseif ($role == 'mahasiswa') {
-    $sql = "SELECT * FROM v_krs_mahasiswa WHERE NIM_Mahasiswa = ?";
+    $sql = "SELECT * FROM v_krs_mahasiswa WHERE Email_Mahasiswa = ?";
 } else {
     header("Location: ../LoginPage/Login.php");
     exit();
@@ -36,6 +36,13 @@ if ($result->num_rows > 0) {
     $jadwal = $result->fetch_all(MYSQLI_ASSOC);
 }
 $stmt->close();
+
+function calculateTimeRange($startTime, $sks) {
+    $start = new DateTime($startTime);
+    $end = clone $start;
+    $end->modify('+' . ($sks * 1) . ' hours');
+    return $start->format('H:i:s') . '-' . $end->format('H:i:s');
+}
 ?>
 
 <!DOCTYPE html>
@@ -76,7 +83,9 @@ $stmt->close();
                             <td><?= htmlspecialchars($j['Nama_Matkul']); ?></td>
                             <td><?= htmlspecialchars($j['sks']); ?></td>
                             <td><?= htmlspecialchars($j['Hari_Matkul']); ?></td>
-                            <td><?= htmlspecialchars($j['Jam_Matkul']); ?></td>
+                            <td>
+                                <?= calculateTimeRange($j['Jam_Matkul'], $j['sks']); ?>
+                            </td>
                             <td><?= htmlspecialchars($j['Ruangan']); ?></td>
                             <?php if ($role == 'mahasiswa' && isset($j['Nama_Dosen'])): ?>
                                 <td><?= htmlspecialchars($j['Nama_Dosen']); ?></td>
@@ -91,4 +100,3 @@ $stmt->close();
 </div>
 </body>
 </html>
-

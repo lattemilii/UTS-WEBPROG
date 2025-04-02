@@ -6,6 +6,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
+$error = '';
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nik = $_POST['NIK'] ?? '';
     $nama = $_POST['Nama'] ?? '';
@@ -53,26 +55,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $cek->store_result();
     $result = $cek->num_rows;
 
-    //insert to users
+
     if ($result == 0) {
         $insert = $con->prepare("INSERT INTO users (email, password, role, NIK) VALUES (?, ?, 'dosen', ?)");
         $insert->bind_param("sss", $email, $hpass, $nik);
-        if($insert->execute()) {
-            header("Location: MsDosen.php");
-        } else {
-            echo "Data gagal masuk " . $insert->error;
+        if (!$insert->execute()) {
+            $error = "Data gagal masuk ke tabel users: " . $insert->error;
         }
-    }  
-
-    //insert to dosen
-    $stmt = $con->prepare("INSERT INTO dosen (NIK, Nama, dob, Gelar, Lulusan, email, Telp, User_Input, Tanggal_Input) VALUES (?, ?,?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssssssss", $nik, $nama,$dob, $gelar, $lulusan, $email, $telp, $user_input, $tanggal_input);
-    if($stmt->execute()) {
-        header("Location: MsDosen.php");
     } else {
-        echo "Error: " . $stmt->error;
+        $error = "NIK sudah terdaftar.";
     }
-    $stmt->close();
+
+    
+    if (empty($error)) {
+        $stmt = $con->prepare("INSERT INTO dosen (NIK, Nama, dob, Gelar, Lulusan, email, Telp, User_Input, Tanggal_Input) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssssssss", $nik, $nama, $dob, $gelar, $lulusan, $email, $telp, $user_input, $tanggal_input);
+        if (!$stmt->execute()) {
+            $error = "Data gagal masuk ke tabel dosen: " . $stmt->error;
+        } else {
+            header("Location: MsDosen.php");
+            exit();
+        }
+        $stmt->close();
+    }
 }
 ?>
 
@@ -87,35 +92,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body>
     <div class="container">
         <h1>Tambah Dosen</h1>
+        <?php if (!empty($error)): ?>
+            <p class="error-message"><?php echo htmlspecialchars($error); ?></p>
+        <?php endif; ?>
         <form action="TambahDosen.php" method="post">
-        <div class="form-group">
-            <label for="nik">NIK:</label>
-            <input type="text" id="nik" name="NIK" required>
-        </div>
-        <div class="form-group">
-            <label for="nama">Nama:</label>
-            <input type="text" id="nama" name="Nama" required>
-        </div>
-        <div class="form-group">
-            <label for="dob">DOB:</label>
-            <input type="date" id="dob" name="dob" required>
-        </div>
-        <div class="form-group">
-            <label for="gelar">Gelar:</label>
-            <input type="text" id="gelar" name="Gelar" required>
-        </div>
-        <div class="form-group">
-            <label for="lulusan">Lulusan:</label>
-            <input type="text" id="lulusan" name="Lulusan" required>
-        </div>
-        <div class="form-group">
-            <label for="telp">Telp:</label>
-            <input type="text" id="telp" name="Telp" required>
-        </div>
-        <button type="submit" class="btn">Tambah</button>
-        <button type="button" class="btn" onclick="window.location.href='MsDosen.php'">Batal</button>
-    </form>
+            <div class="form-group">
+                <label for="nik">NIK:</label>
+                <input type="text" id="nik" name="NIK" required>
+            </div>
+            <div class="form-group">
+                <label for="nama">Nama:</label>
+                <input type="text" id="nama" name="Nama" required>
+            </div>
+            <div class="form-group">
+                <label for="dob">DOB:</label>
+                <input type="date" id="dob" name="dob" required>
+            </div>
+            <div class="form-group">
+                <label for="gelar">Gelar:</label>
+                <input type="text" id="gelar" name="Gelar" required>
+            </div>
+            <div class="form-group">
+                <label for="lulusan">Lulusan:</label>
+                <input type="text" id="lulusan" name="Lulusan" required>
+            </div>
+            <div class="form-group">
+                <label for="telp">Telp:</label>
+                <input type="text" id="telp" name="Telp" required>
+            </div>
+            <button type="submit" class="btn">Tambah</button>
+            <button type="button" class="btn" onclick="window.location.href='MsDosen.php'">Batal</button>
+        </form>
     </div>
 </body>
 </html>
-
