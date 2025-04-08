@@ -12,6 +12,33 @@ function formatName($name) {
     return implode(' ', $formattedParts);
 }
 
+function generateEmailFromName($nama, $con) {
+    $base = strtolower(str_replace(' ', '.', $nama));
+    $email = $base . '@lecturer.umn.ac.id';
+    $counter = 1;
+    $count = 0;
+
+    $stmt = $con->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $stmt->bind_result($count);
+    $stmt->fetch();
+    $stmt->close();
+
+    while ($count > 0) {
+        $email = $base . $counter . '@lecturer.umn.ac.id';
+        $stmt = $con->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $stmt->bind_result($count);
+        $stmt->fetch();
+        $stmt->close();
+        $counter++;
+    }
+
+    return $email;
+}
+
 $email = $_SESSION['email'] ?? '';
 $name = formatName(explode('@', $email)[0]);
 
@@ -29,8 +56,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $tanggal_input = date('Y-m-d H:i:s');
     
     if ($isEdit) {
-        $stmt = $con->prepare("UPDATE dosen SET Nama = ?, Gelar = ?, Lulusan = ?, email = ?, Telp = ?, User_Input = '?', Tanggal_Input = ? WHERE NIK = ?");
-        $stmt->bind_param("ssssssss", $nama, $gelar, $lulusan, $email, $telp, $tanggal_input, $user_input, $nik);
+        $stmt = $con->prepare("UPDATE dosen SET Nama = ?, Gelar = ?, Lulusan = ?, email = ?, Telp = ?, User_Input = 'admin', Tanggal_Input = ? WHERE NIK = ?");
+        $stmt->bind_param("sssssss", $nama, $gelar, $lulusan, $email, $telp, $tanggal_input, $nik);
         if (!$stmt->execute()) {
             $error = "Data dosen gagal diupdate! " . $stmt->error;
         } else {
@@ -123,7 +150,7 @@ $dosen = $result->fetch_all(MYSQLI_ASSOC);
                     <img src="../assets/UMN.png" alt="UMN Logo">
                 </div>
                 <div class="links">
-                    <a href="../MainMenu/MainMenu.php">Back</a>
+                    <a href="../MainMenu/MainMenu.php">Menu</a>
                 </div>
             </div>
             <div class="profile">

@@ -12,6 +12,33 @@ function formatName($name) {
     return implode(' ', $formattedParts);
 }
 
+function generateEmailFromName($nama, $con) {
+    $base = strtolower(str_replace(' ', '.', $nama));
+    $email = $base . '@student.umn.ac.id';
+    $counter = 1;
+    $count = 0;
+
+    $stmt = $con->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $stmt->bind_result($count);
+    $stmt->fetch();
+    $stmt->close();
+
+    while ($count > 0) {
+        $email = $base . $counter . '@student.umn.ac.id';
+        $stmt = $con->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $stmt->bind_result($count);
+        $stmt->fetch();
+        $stmt->close();
+        $counter++;
+    }
+
+    return $email;
+}
+
 $email = $_SESSION['email'] ?? '';
 $name = formatName(explode('@', $email)[0]);
 
@@ -30,15 +57,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $tanggal_input = date('Y-m-d H:i:s');
 
     if ($isEdit) {
-        $stmt = $con->prepare("UPDATE mahasiswa SET nama=?, tahun_masuk=?, DOB=?, prodi=?, alamat=?, no_telp=? WHERE NIM=?");
-        $stmt->bind_param("sssssss", $nama, $tahun_masuk, $dob, $prodi, $alamat, $telp, $nim);
+        // Generate email baru
+        $emailBaru = generateEmailFromName($nama, $con);
+
+        // Update tabel mahasiswa
+        $stmt = $con->prepare("UPDATE mahasiswa SET nama=?, tahun_masuk=?, DOB=?, prodi=?, alamat=?, no_telp=?, email=? WHERE NIM=?");
+        $stmt->bind_param("ssssssss", $nama, $tahun_masuk, $dob, $prodi, $alamat, $telp, $emailBaru, $nim);
         if (!$stmt->execute()) {
             $error = "Data mahasiswa gagal diupdate! " . $stmt->error;
-        } else {
+        }
+        $stmt->close();
+
+        // Update email di tabel users
+        $stmt = $con->prepare("UPDATE users SET email=? WHERE NIM=?");
+        $stmt->bind_param("ss", $emailBaru, $nim);
+        $stmt->execute();
+        $stmt->close();
+
+        if (empty($error)) {
             header("Location: MsMahasiswa.php");
             exit();
         }
-        $stmt->close();
     } else {
         $password = str_replace('-', '', $dob);
         $hpass = password_hash($password, PASSWORD_DEFAULT);
@@ -123,7 +162,7 @@ $mahasiswa = $result->fetch_all(MYSQLI_ASSOC);
                 <img src="../assets/UMN.png" alt="UMN Logo">
             </div>
             <div class="links">
-                <a href="../MainMenu/MainMenu.php">Back</a>
+                <a href="../MainMenu/MainMenu.php">Menu</a>
             </div>
         </div>
         <div class="profile">

@@ -47,9 +47,7 @@ $userMenus = $menus[$role] ?? [];
                     <img src="../assets/UMN.png" alt="UMN Logo">
                 </div>
                 <div class="links">
-                    <a href="../LoginPage/Login.php">Login</a>
-                    <a href="../MainMenu/MainMenu.php">Menu</a>
-                    <a href="#" onclick="showSignOutPopup()">Sign Out</a>
+                    <a href="#" onclick="showSignOutPopup()">Log Out</a>
                 </div>
             </div>
             <div class="profile">

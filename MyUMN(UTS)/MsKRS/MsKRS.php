@@ -113,7 +113,7 @@ function calculateTimeRange($startTime, $sks) {
                     <img src="../assets/UMN.png" alt="UMN Logo">
                 </div>
                 <div class="links">
-                    <a href="../MainMenu/MainMenu.php">Back</a>
+                    <a href="../MainMenu/MainMenu.php">Menu</a>
                 </div>
             </div>
             <div class="profile">

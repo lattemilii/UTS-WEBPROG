@@ -7,6 +7,15 @@ if (!isset($_SESSION['role']) || !isset($_SESSION['email'])) {
     exit();
 }
 
+function formatName($name) {
+    $parts = explode('.', $name);
+    $formattedParts = array_map('ucfirst', $parts);
+    return implode(' ', $formattedParts);
+}
+
+$email = $_SESSION['email'] ?? '';
+$name = formatName(explode('@', $email)[0]);
+
 $role = $_SESSION['role'];
 $email = $_SESSION['email'];
 $jadwal = [];
@@ -55,7 +64,24 @@ function calculateTimeRange($startTime, $sks) {
 </head>
 <body>
 <div class="container">
-    <h1>Report</h1>
+    <div class="navbar">
+            <div class="navbar-left">
+                <div class="logo">
+                    <img src="../assets/UMN.png" alt="UMN Logo">
+                </div>
+                <div class="links">
+                    <a href="../MainMenu/MainMenu.php">Menu</a>
+                </div>
+            </div>
+            <div class="profile">
+                <span><?php echo htmlspecialchars($name); ?></span>
+                <div class="avatar">
+                    <img src="../assets/profile-picture.png" alt="Profile Picture">
+                </div>
+            </div>
+        </div>
+
+    <h1 class="judul">Report</h1>
     <div class="table-container">
         <table>
             <thead>
@@ -87,8 +113,8 @@ function calculateTimeRange($startTime, $sks) {
                                 <?= calculateTimeRange($j['Jam_Matkul'], $j['sks']); ?>
                             </td>
                             <td><?= htmlspecialchars($j['Ruangan']); ?></td>
-                            <?php if ($role == 'mahasiswa' && isset($j['Nama_Dosen'])): ?>
-                                <td><?= htmlspecialchars($j['Nama_Dosen']); ?></td>
+                            <?php if ($role == 'mahasiswa' && isset($j['Nama_dosen'])): ?>
+                                <td><?= htmlspecialchars($j['Nama_dosen']); ?></td>
                             <?php endif; ?>
                         </tr>
                     <?php endforeach; ?>
@@ -96,7 +122,6 @@ function calculateTimeRange($startTime, $sks) {
             </tbody>
         </table>
     </div>
-    <button class="btn" onclick="window.location.href='../MainMenu/MainMenu.php'">Kembali</button>
 </div>
 </body>
 </html>
