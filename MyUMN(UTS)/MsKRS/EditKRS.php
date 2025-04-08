@@ -6,36 +6,28 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-if (isset($_GET['Kode_Matkul'])) {
-    $kode_matkul = $_GET['Kode_Matkul'];
-    $stmt = $con->prepare("SELECT * FROM krs WHERE Kode_Matkul = ?");
-    $stmt->bind_param("s", $kode_matkul);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $krs = $result->fetch_assoc();
+if (!isset($_GET['kode_matkul'])) {
+    echo "Kode matkul tidak dikirim.";
+    exit();
 }
+$kode_matkul = $_GET['kode_matkul'];
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $kode_matkul = $_POST['Kode_Matkul'] ?? '';
-    $nik_dosen = $_POST['NIK_Dosen'] ?? '';
-    $nim_mahasiswa = $_POST['NIM_Mahasiswa'] ?? '';
-    $hari_matkul = $_POST['Hari_Matkul'] ?? '';
-    $ruangan = $_POST['Ruangan'] ?? '';
-    $user_input = $_SESSION['email'] ?? '';
-    $tanggal_input = date('Y-m-d H:i:s');
+$stmt = $con->prepare("SELECT * FROM krs WHERE Kode_Matkul = ?");
+$stmt->bind_param("s", $kode_matkul);
+$stmt->execute();
+$result = $stmt->get_result();
+$krs = $result->fetch_assoc();
 
-    $stmt = $con->prepare("UPDATE krs SET NIK_Dosen = ?, NIM_Mahasiswa = ?, Hari_Matkul = ?, Ruangan = ?, User_Input = ?, Tanggal_Input = ? WHERE Kode_Matkul = ?");
-    $stmt->bind_param("sssssss", $nik_dosen, $nim_mahasiswa, $hari_matkul, $ruangan, $user_input, $tanggal_input, $kode_matkul);
-    if ($stmt->execute()) {
-        header("Location: MsKRS.php");
-        exit();
-    } else {
-        echo "Data gagal diupdate " . $stmt->error;
-    }
-    $stmt->close();
+if (!$krs) {
+    echo "Data KRS tidak ditemukan.";
+    exit();
 }
+    
+$isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+              strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 ?>
 
+<?php if (!$isAjax): ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -45,9 +37,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="MsKRS.css">
 </head>
 <body>
-<div class="container">
-    <h1>Edit KRS</h1>
-    <form action="EditKRS.php?Kode_Matkul=<?php echo htmlspecialchars($kode_matkul); ?>" method="post">
+<?php endif; ?>
+<div class="modal-content">
+    <h2 class="judul">Edit KRS</h2>
+
+    <form method="POST" action="MsKRS.php" id="formEditKRS" enctype="multipart/form-data" class="form-edit">
         <div class="form-group">
             <label for="kode_matkul">Kode Matkul:</label>
             <input type="text" id="kode_matkul" name="Kode_Matkul" value="<?php echo htmlspecialchars($krs['Kode_Matkul'] ?? ''); ?>" readonly>
@@ -62,16 +56,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
         <div class="form-group">
             <label for="hari_matkul">Hari Matkul:</label>
-            <input type="text" id="hari_matkul" name="Hari_Matkul" value="<?php echo htmlspecialchars($krs['Hari_Matkul'] ?? ''); ?>" required>
+            <input type="text" id="hari_matkul" name="Hari_Matkul" value="<?php echo htmlspecialchars($krs['hari_matkul'] ?? ''); ?>" required>
         </div>
         <div class="form-group">
             <label for="ruangan">Ruangan:</label>
-            <input type="text" id="ruangan" name="Ruangan" value="<?php echo htmlspecialchars($krs['Ruangan'] ?? ''); ?>" required>
+            <input type="text" id="ruangan" name="Ruangan" value="<?php echo htmlspecialchars($krs['ruangan'] ?? ''); ?>" required>
         </div>
-        <button type="submit" name="edit" class="btn">Simpan Perubahan</button>
-        <button type="button" class="btn" onclick="window.location.href='DeleteKRS.php?Kode_Matkul=<?php echo htmlspecialchars($kode_matkul); ?>'">Hapus</button>
-        <button type="button" class="btn" onclick="window.location.href='MsKRS.php'">Batal</button>
+
+        <input type="hidden" name="action" value="edit">
+
+        <div class="button-group">
+            <button type="submit" class="btn">Simpan Perubahan</button>
+            <button type="button" class="btn btn-danger" onclick="if(confirm('Yakin ingin menghapus data ini?')) window.location.href='DeleteKRS.php?Kode_Matkul=<?= $krs['Kode_Matkul'] ?>'">Hapus</button>
+        </div>
     </form>
+
+    <img src="../assets/cross-mark.png" alt="Close" class="close-img" onclick="closeModal()">
 </div>
+
+<?php if (!$isAjax): ?>
+<script>
+    function closeModal() {
+        document.querySelector(".modal").style.display = "none";
+        document.body.classList.remove("modal-open");
+    }
+</script>
 </body>
 </html>
+<?php endif; ?>

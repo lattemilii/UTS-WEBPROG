@@ -18,96 +18,92 @@ function formatName($name) {
 }
 
 $menus = [
-    'admin' => ['Login', 'Main Menu', 'Master Lecturer', 'Master Student', 'Master Subject', 'KRS Transaction'],
-    'dosen' => ['Report'],
-    'mahasiswa' => ['Report']
+    'admin' => [
+        ['label' => 'Mahasiswa', 'link' => '../MsMahasiswa/MsMahasiswa.php', 'icon' => '../assets/graduation-cap.png'],
+        ['label' => 'Dosen', 'link' => '../MsDosen/MsDosen.php', 'icon' => '../assets/reading.png'],
+        ['label' => 'Mata Kuliah', 'link' => '../MsMataKuliah/MsMatkul.php', 'icon' => '../assets/open-book.png'],
+        ['label' => 'KRS', 'link' => '../MsKRS/MsKRS.php', 'icon' => '../assets/clipboard.png']
+    ],
+    'dosen' => [['label' => 'Report', 'link' => '../MsLaporan/MsLaporan.php', 'icon' => '../assets/report.png']],
+    'mahasiswa' => [['label' => 'Report', 'link' => '../MsLaporan/MsLaporan.php', 'icon' => '../assets/report.png']]
 ];
 
-$userMenus = isset($menus[$role]) ? $menus[$role] : [];
-
+$userMenus = $menus[$role] ?? [];
 ?>
-
 
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Menu - MyUMN</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="MainMenu.css">
-    <script>
-        function filterMenu() {
-            const searchInput = document.getElementById('search').value.toLowerCase();
-            const menuItems = document.querySelectorAll('.menu-list li');
-
-            menuItems.forEach(item => {
-                const menuText = item.textContent.toLowerCase();
-                if (menuText.includes(searchInput)) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        }
-
-        function clearSearch() {
-            document.getElementById('search').value = '';
-            filterMenu();
-        }
-    </script>
 </head>
 <body>
-<h1>Selamat Datang Kembali, <?php echo htmlspecialchars($name); ?></h1>
-<div class="menu-container">
-    <h2>Menu</h2>
-    <label for="search">Search:</label>
-    <input type="text" id="search" name="search" oninput="filterMenu()">
-    <ul class="menu-list">
-        <?php foreach ($userMenus as $menu): ?>
-            <li>
-                <?php if ($menu == 'Login'): ?>
-                    <a href="../LoginPage/Login.php" class="menu-button"><?php echo htmlspecialchars($menu); ?></a>
-                <?php elseif ($menu == 'Main Menu'): ?>
-                    <a href="../MainMenu/MainMenu.php" class="menu-button"><?php echo htmlspecialchars($menu); ?></a>
-                <?php elseif ($menu == 'Master Lecturer'): ?>
-                    <a href="../MsDosen/MsDosen.php" class="menu-button"><?php echo htmlspecialchars($menu); ?></a>
-                <?php elseif ($menu == 'Master Student'): ?>
-                    <a href="../MsMahasiswa/MsMahasiswa.php" class="menu-button"><?php echo htmlspecialchars($menu); ?></a>
-                <?php elseif ($menu == 'Master Subject'): ?>
-                    <a href="../MsMataKuliah/MsMatkul.php" class="menu-button"><?php echo htmlspecialchars($menu); ?></a>
-                <?php elseif ($menu == 'KRS Transaction'): ?>
-                    <a href="../MsKRS/MsKRS.php" class="menu-button"><?php echo htmlspecialchars($menu); ?></a>
-                <?php elseif ($menu == 'Report'): ?>
-                    <a href="../MsLaporan/MsLaporan.php" class="menu-button"><?php echo htmlspecialchars($menu); ?></a>
-                <?php else: ?>
-                    <button class="menu-button"><?php echo htmlspecialchars($menu); ?></button>
-                <?php endif; ?>
-            </li>
-        <?php endforeach; ?>
-    </ul>
-    <button class="signout-btn" onclick="showSignOutPopup()">Sign Out</button>
-</div>
+    <div class="container">
+        <div class="navbar">
+            <div class="navbar-left">
+                <div class="logo">
+                    <img src="../assets/UMN.png" alt="UMN Logo">
+                </div>
+                <div class="links">
+                    <a href="../LoginPage/Login.php">Login</a>
+                    <a href="../MainMenu/MainMenu.php">Menu</a>
+                    <a href="#" onclick="showSignOutPopup()">Sign Out</a>
+                </div>
+            </div>
+            <div class="profile">
+                <span><?php echo htmlspecialchars($name); ?></span>
+                <div class="avatar">
+                    <img src="../assets/profile-picture.png" alt="Profile Picture">
+                </div>
+            </div>
+        </div>
 
-<div id="signout-popup" class="popup">
-    <div class="popup-content">
-        <p>Apakah kamu yakin ingin keluar?</p>
-        <button onclick="signOut()">Ya</button>
-        <button onclick="hideSignOutPopup()">Tidak</button>
+        <h2>Menu</h2>
+        <div class="search-bar">
+            <label for="search">Search :</label>
+            <input type="text" id="search" oninput="filterMenu()">
+        </div>
+
+        <div class="grid-menu" id="menu-grid">
+            <?php foreach ($userMenus as $menu): ?>
+                <a href="<?= $menu['link'] ?>" class="menu-card">
+                    <div class="menu-icon">
+                        <img src="<?= $menu['icon'] ?>" alt="<?= htmlspecialchars($menu['label']) ?>">
+                    </div>
+                    <div class="menu-title"><?= htmlspecialchars($menu['label']) ?></div>
+                </a>
+            <?php endforeach; ?>
+        </div>
     </div>
-</div>
 
-<script>
-function showSignOutPopup() {
-    document.getElementById('signout-popup').style.display = 'block';
-}
+    <div class="popup" id="signout-popup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center;">
+        <div class="popup-content" style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
+            <p>Yakin ingin keluar?</p>
+            <button onclick="signOut()">Ya</button>
+            <button onclick="hideSignOutPopup()">Tidak</button>
+        </div>
+    </div>
 
-function hideSignOutPopup() {
-    document.getElementById('signout-popup').style.display = 'none';
-}
-
-function signOut() {
-    window.location.href = '../LogoutSection/Logout.php';
-}
+    <script>
+    function filterMenu() {
+        const search = document.getElementById('search').value.toLowerCase();
+        const items = document.querySelectorAll('.menu-card');
+        items.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            item.style.display = text.includes(search) ? '' : 'none';
+        });
+    }
+    function showSignOutPopup() {
+        document.getElementById('signout-popup').style.display = 'flex';
+    }
+    function hideSignOutPopup() {
+        document.getElementById('signout-popup').style.display = 'none';
+    }
+    function signOut() {
+        window.location.href = '../LogoutSection/Logout.php';
+    }
 </script>
 </body>
 </html>
