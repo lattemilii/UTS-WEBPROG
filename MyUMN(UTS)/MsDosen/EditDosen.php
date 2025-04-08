@@ -62,10 +62,6 @@ $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
             <input type="text" id="lulusan" name="lulusan" value="<?= htmlspecialchars($dosen['lulusan']) ?>" required>
         </div>
         <div class="form-group">
-            <label for="email">Email:</label>
-            <input type="text" id="email" name="email" value="<?= htmlspecialchars($dosen['email']) ?>" required>
-        </div>
-        <div class="form-group">
             <label for="no_telp">Telp:</label>
             <input type="text" id="no_telp" name="no_telp" value="<?= htmlspecialchars($dosen['no_telp']) ?>" required>
         </div>

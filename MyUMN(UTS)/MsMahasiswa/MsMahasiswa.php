@@ -12,8 +12,9 @@ function formatName($name) {
     return implode(' ', $formattedParts);
 }
 
-function generateEmailFromName($nama, $con) {
-    $base = strtolower(str_replace(' ', '.', $nama));
+function generateEmail($nama, $con) {
+    $parts = explode(' ', strtolower($nama));
+    $base = implode('.', array_slice($parts, 0, 2)); // Ambil dua kata pertama
     $email = $base . '@student.umn.ac.id';
     $counter = 1;
     $count = 0;
@@ -57,23 +58,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $tanggal_input = date('Y-m-d H:i:s');
 
     if ($isEdit) {
-        // Generate email baru
-        $emailBaru = generateEmailFromName($nama, $con);
-
-        // Update tabel mahasiswa
+        
+        $emailBaru = generateEmail($nama, $con);
+    
+        
         $stmt = $con->prepare("UPDATE mahasiswa SET nama=?, tahun_masuk=?, DOB=?, prodi=?, alamat=?, no_telp=?, email=? WHERE NIM=?");
         $stmt->bind_param("ssssssss", $nama, $tahun_masuk, $dob, $prodi, $alamat, $telp, $emailBaru, $nim);
         if (!$stmt->execute()) {
             $error = "Data mahasiswa gagal diupdate! " . $stmt->error;
         }
         $stmt->close();
-
-        // Update email di tabel users
+    
+        
         $stmt = $con->prepare("UPDATE users SET email=? WHERE NIM=?");
         $stmt->bind_param("ss", $emailBaru, $nim);
         $stmt->execute();
         $stmt->close();
-
+    
         if (empty($error)) {
             header("Location: MsMahasiswa.php");
             exit();
@@ -82,33 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $password = str_replace('-', '', $dob);
         $hpass = password_hash($password, PASSWORD_DEFAULT);
 
-        function generateEmail($nama, $con) {
-            $base = strtolower(str_replace(' ', '.', $nama));
-            $email = $base . '@student.umn.ac.id';
-            $counter = 1;
-            $count = 0;
-
-            $stmt = $con->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
-            $stmt->bind_param("s", $email);
-            $stmt->execute();
-            $stmt->bind_result($count);
-            $stmt->fetch();
-            $stmt->close();
-
-            while ($count > 0) {
-                $email = $base . $counter . '@student.umn.ac.id';
-                $stmt = $con->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
-                $stmt->bind_param("s", $email);
-                $stmt->execute();
-                $stmt->bind_result($count);
-                $stmt->fetch();
-                $stmt->close();
-                $counter++;
-            }
-
-            return $email;
-        }
-
+    
         $emailNew = generateEmail($nama, $con);
 
         $cek = $con->prepare("SELECT * FROM users WHERE NIM = ?");

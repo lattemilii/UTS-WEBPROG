@@ -20,6 +20,8 @@ $error = '';
 $showModal = false;
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $isEdit = isset($_POST['action']) && $_POST['action'] === 'edit';
+
     $kode_matkul = $_POST['Kode_Matkul'] ?? '';
     $nik_dosen = $_POST['NIK_Dosen'] ?? '';
     $nim_mahasiswa = $_POST['NIM_Mahasiswa'] ?? '';
@@ -36,44 +38,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             header("Location: MsKRS.php");
             exit();
         } else {
-            echo "Data gagal diupdate " . $stmt->error;
+            $error = "Data gagal diupdate: " . $stmt->error;
         }
         $stmt->close();
-    }
-
-    $cek_matkul = $con->prepare("SELECT 1 FROM mata_kuliah WHERE Kode_Matkul = ?");
-    $cek_matkul->bind_param("s", $kode_matkul);
-    $cek_matkul->execute();
-    $cek_matkul->store_result();
-    if ($cek_matkul->num_rows == 0) {
-        $error = "Kode mata kuliah tidak ditemukan.";
-    }
-
-    $cek_dosen = $con->prepare("SELECT 1 FROM dosen WHERE NIK = ?");
-    $cek_dosen->bind_param("s", $nik_dosen);
-    $cek_dosen->execute();
-    $cek_dosen->store_result();
-    if ($cek_dosen->num_rows == 0) {
-        $error = "NIK dosen tidak ditemukan.";
-    }
-
-    $cek_mahasiswa = $con->prepare("SELECT 1 FROM mahasiswa WHERE NIM = ?");
-    $cek_mahasiswa->bind_param("s", $nim_mahasiswa);
-    $cek_mahasiswa->execute();
-    $cek_mahasiswa->store_result();
-    if ($cek_mahasiswa->num_rows == 0) {
-        $error = "NIM mahasiswa tidak ditemukan.";
-    }
-
-    if (empty($error)) {
-        $insert = $con->prepare("INSERT INTO krs (Kode_Matkul, NIK_Dosen, NIM_Mahasiswa, hari_matkul, jam_matkul, ruangan, user_input, tanggal_input) VALUES (?,?,?,?,?,?,?,?)");
-        $insert->bind_param("ssssssss", $kode_matkul, $nik_dosen, $nim_mahasiswa, $hari_matkul, $jam_matkul, $ruangan, $user_input, $tanggal_input);
-        if ($insert->execute()) {
-            header("Location: MsKRS.php");
-            exit();
+    } else {
+        // Periksa duplicate entry
+        $cek_krs = $con->prepare("SELECT 1 FROM krs WHERE Kode_Matkul = ? AND NIK_Dosen = ? AND NIM_Mahasiswa = ?");
+        $cek_krs->bind_param("sss", $kode_matkul, $nik_dosen, $nim_mahasiswa);
+        $cek_krs->execute();
+        $cek_krs->store_result();
+        if ($cek_krs->num_rows > 0) {
+            $error = "Data KRS dengan kombinasi yang sama sudah ada.";
         } else {
-            $error = "Data gagal masuk: " . $insert->error;
+            $insert = $con->prepare("INSERT INTO krs (Kode_Matkul, NIK_Dosen, NIM_Mahasiswa, hari_matkul, jam_matkul, ruangan, user_input, tanggal_input) VALUES (?,?,?,?,?,?,?,?)");
+            $insert->bind_param("ssssssss", $kode_matkul, $nik_dosen, $nim_mahasiswa, $hari_matkul, $jam_matkul, $ruangan, $user_input, $tanggal_input);
+            if ($insert->execute()) {
+                header("Location: MsKRS.php");
+                exit();
+            } else {
+                $error = "Data gagal masuk: " . $insert->error;
+            }
         }
+        $cek_krs->close();
     }
 }
 
@@ -104,7 +90,7 @@ function calculateTimeRange($startTime, $sks) {
 <body>
     <div class="container">
         <?php if (!empty($error)): ?>
-            <div class="floating-alert show" id="notifBox"><?= $error ?></div>
+            <div class="floating-alert show" id="notifBox"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
 
         <div class="navbar">
