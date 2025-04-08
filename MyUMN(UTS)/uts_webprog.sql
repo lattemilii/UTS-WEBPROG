@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 03, 2025 at 05:28 PM
+-- Generation Time: Apr 08, 2025 at 01:00 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -48,7 +48,8 @@ INSERT INTO `dosen` (`NIK`, `nama`, `email`, `DOB`, `gelar`, `lulusan`, `no_telp
 ('L123456', 'Hyunjin Hwang', 'hyunjin.hwang@lecturer.umn.ac.id', '2000-02-20', 'Dr.', 'MIT', '018232764248', 'shellen.putri@admin.umn.ac.id', '2025-04-02 17:38:26'),
 ('L213154', 'Jay Park', 'jay.park@lecturer.umn.ac.id', '2002-04-20', 'Ph.D.', 'Toronto University', '017832647924', 'shellen.putri@admin.umn.ac.id', '2025-04-02 17:40:43'),
 ('L397574', 'Nakamura Kazuha', 'nakamura.kazuha@lecturer.umn.ac.id', '2003-08-09', 'S.S.', 'Harvard University', '012947827484', 'najy.nabil@admin.umn.ac.id', '2025-04-02 17:42:23'),
-('L674932', 'Kim Chaewon', 'kim.chaewon@lecturer.umn.ac.id', '2000-08-01', 'S.T.', 'Yonsei University', '018247846250', 'najy.nabil@admin.umn.ac.id', '2025-04-02 17:43:22');
+('L674932', 'Kim Chaewon', 'kim.chaewon@lecturer.umn.ac.id', '2000-08-01', 'S.T.', 'Yonsei University', '018247846250', 'najy.nabil@admin.umn.ac.id', '2025-04-02 17:43:22'),
+('L749374', 'Dareen Kusuma Halim', 'dareen.kusuma@lecturer.umn.ac.id', '2025-04-07', 'S2 Pinter', 'Universitas Indonesia', '08111666707', 'emily.francesca@admin.umn.ac.id', '2025-04-08 12:38:34');
 
 -- --------------------------------------------------------
 
@@ -75,7 +76,8 @@ CREATE TABLE `krs` (
 INSERT INTO `krs` (`id_krs`, `NIK_Dosen`, `Kode_Matkul`, `NIM_Mahasiswa`, `hari_matkul`, `jam_matkul`, `ruangan`, `user_input`, `tanggal_input`) VALUES
 (16, 'L014837', 'CE432', '00000092747', 'Senin', '08:00:00', 'C302', 'najy.nabil@admin.umn.ac.id', '2025-04-03'),
 (20, 'L123456', 'IF260', '000000383865', 'Selasa', '10:00:00', 'D1205', 'najy.nabil@admin.umn.ac.id', '2025-04-03'),
-(21, 'L213154', 'IF330', '00000174938', 'Rabu', '13:00:00', 'C606', 'emily.francesca@admin.umn.ac.id', '2025-04-03');
+(21, 'L213154', 'IF330', '00000174938', 'Rabu', '13:00:00', 'C606', 'emily.francesca@admin.umn.ac.id', '2025-04-03'),
+(22, 'L749374', 'UM387', '00000110235', 'Jumat', '13:00:00', 'D1102', 'emily.francesca@admin.umn.ac.id', '2025-04-08');
 
 -- --------------------------------------------------------
 
@@ -110,6 +112,7 @@ INSERT INTO `mahasiswa` (`NIM`, `nama`, `email`, `DOB`, `tahun_masuk`, `prodi`, 
 ('00000092747', 'Angelina Jolie', 'angelina.jolie@student.umn.ac.id', '2001-09-06', '2021', 'Arsitektur', 'Jl. Los Angeles', '018287539350', 'shellen.putri@admin.umn.ac.id', '2025-04-03 15:17:46'),
 ('00000092773', 'Ryan Reynolds', 'ryan.reynolds@student.umn.ac.id', '2003-10-23', '2024', 'Akuntansi', 'Jl. Vancouver', '018927859386', 'emily.francesca@admin.umn.ac.id', '2025-04-03 15:45:49'),
 ('00000093783', 'Chris Evans', 'chris.evans@student.umn.ac.id', '2003-06-13', '2024', 'Teknik Fisika', 'Jl, Boston ', '019272385651', 'najy.nabil@admin.umn.ac.id', '2025-04-03 16:31:17'),
+('00000110235', 'Najy Nabil Indrianto', 'najy.nabil@student.umn.ac.id', '2005-09-12', '2023', 'Teknik Komputer', 'Jl. Alam Permai I', '08111777606', 'emily.francesca@admin.umn.ac.id', '2025-04-08 12:41:13'),
 ('00000174938', 'Tom Holland', 'tom.holland@student.umn.ac.id', '2004-07-04', '2024', 'Teknik Komputer', 'Jl. London', '018924892186', 'shellen.putri@admin.umn.ac.id', '2025-04-03 15:13:14'),
 ('00000192573', 'Keanu Reeves', 'keanu.reeves@student.umn.ac.id', '2003-01-09', '2023', 'Informatika', 'Jl. Melbourne', '019278548293', 'najy.nabil@admin.umn.ac.id', '2025-04-03 16:04:58'),
 ('00000193758', 'Henry Cavill', 'henry.cavill@student.umn.ac.id', '2001-05-05', '2024', 'Perhotelan', 'Jl. Saint Heller', '012975385980', 'emily.francesca@admin.umn.ac.id', '2025-04-03 15:38:29'),
@@ -221,7 +224,9 @@ INSERT INTO `users` (`email`, `password`, `NIM`, `NIK`, `role`, `user_input`, `t
 ('keanu.reeves@student.umn.ac.id', '$2y$10$XaNPFTkisL/95YAfC.2/EOiJJJuSBWza.Vn.ySCMUnkw7uojqHYmi', '00000192573', '', 'mahasiswa', NULL, '0000-00-00 00:00:00'),
 ('chris.evans@student.umn.ac.id', '$2y$10$gOUyZdj2jGxneQ8MHP1m7Oic/XxtVmMyobcjAf8omtO8mnRN5Y/aW', '00000093783', '', 'mahasiswa', NULL, '0000-00-00 00:00:00'),
 ('paul.rudd@student.umn.ac.id', '$2y$10$Bk.vsNDL81DHGJgmsbn.weKB4b.EGp3EMv4OiMAGhsF.fSJH/BLU2', '00000293856', '', 'mahasiswa', NULL, '0000-00-00 00:00:00'),
-('timothee.chalamet@student.umn.ac.id', '$2y$10$RJ9ZAfqhdVrg0x6FmK4RnunH3CKrVtyOHojOT2lvRMaEmHXCjpah6', '00000829438', '', 'mahasiswa', NULL, '0000-00-00 00:00:00');
+('timothee.chalamet@student.umn.ac.id', '$2y$10$RJ9ZAfqhdVrg0x6FmK4RnunH3CKrVtyOHojOT2lvRMaEmHXCjpah6', '00000829438', '', 'mahasiswa', NULL, '0000-00-00 00:00:00'),
+('dareen.kusuma@lecturer.umn.ac.id', '$2y$10$Oa8zjNx5MRcILzlsxNoiYObok4d03vQpbT1sO8..6XPpOrYKrSuTG', '', 'L749374', 'dosen', NULL, '0000-00-00 00:00:00'),
+('najy.nabil@student.umn.ac.id', '$2y$10$bT/IWHCFTom66/qeZiH6vO5msL9KMLqP8P/DuIlp0EcfWwks3sImu', '00000110235', '', 'mahasiswa', NULL, '0000-00-00 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -314,7 +319,7 @@ ALTER TABLE `mata_kuliah`
 -- AUTO_INCREMENT for table `krs`
 --
 ALTER TABLE `krs`
-  MODIFY `id_krs` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id_krs` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- Constraints for dumped tables

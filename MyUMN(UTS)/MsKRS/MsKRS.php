@@ -42,7 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         $stmt->close();
     } else {
-        // Periksa duplicate entry
         $cek_krs = $con->prepare("SELECT 1 FROM krs WHERE Kode_Matkul = ? AND NIK_Dosen = ? AND NIM_Mahasiswa = ?");
         $cek_krs->bind_param("sss", $kode_matkul, $nik_dosen, $nim_mahasiswa);
         $cek_krs->execute();

@@ -57,7 +57,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $tanggal_input = date('Y-m-d H:i:s');
     
     if ($isEdit) {
-        // Hasilkan email baru berdasarkan nama dosen
         $emailNew = generateEmailFromName($nama, $con);
 
         $stmt = $con->prepare("UPDATE dosen SET nama = ?, gelar = ?, lulusan = ?, email = ?, no_telp = ?, user_input = ?, tanggal_input = ? WHERE NIK = ?");
@@ -65,7 +64,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (!$stmt->execute()) {
             $error = "Data dosen gagal diupdate! " . $stmt->error;
         } else {
-            // Perbarui email di tabel users
             $stmt = $con->prepare("UPDATE users SET email = ? WHERE NIK = ?");
             $stmt->bind_param("ss", $emailNew, $nik);
             $stmt->execute();
@@ -79,7 +77,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $password = str_replace('-', '', $dob);
         $hpass = password_hash($password, PASSWORD_DEFAULT);
 
-        // Gunakan fungsi generateEmailFromName untuk menghasilkan email
         $emailNew = generateEmailFromName($nama, $con);
 
         $cek = $con->prepare("SELECT * FROM users WHERE NIK = ?");
