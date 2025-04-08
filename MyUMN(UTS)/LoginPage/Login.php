@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body>
 <div class="login-container">
     <div class="welcome-box">
-        <img src="umnputih.png" alt="Logo" class="welcome-logo">
+        <img src="../assets/umnputih.png" alt="Logo" class="welcome-logo">
         <h2>Welcome!</h2>
         <p>Selamat datang di MyUMN! MyUMN adalah portal akademik Universitas Multimedia Nusantara yang memudahkan mahasiswa dalam mengakses informasi akademik, jadwal kuliah, serta berbagai layanan kampus lainnya. 
             Silakan login dengan akun anda untuk masuk ke dalam MyUMN</p>

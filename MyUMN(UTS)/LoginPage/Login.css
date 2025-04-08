@@ -1,7 +1,7 @@
 body {
     font-family: Arial, sans-serif;
     background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-                url('gedungumn.jpg') no-repeat center center fixed;
+                url('../assets/gedungumn.jpg') no-repeat center center fixed;
     background-size: cover;
     display: flex;
     justify-content: center;
