@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     if ($isEdit) {
         $stmt = $con->prepare("UPDATE dosen SET Nama = ?, Gelar = ?, Lulusan = ?, email = ?, Telp = ?, User_Input = 'admin', Tanggal_Input = ? WHERE NIK = ?");
-        $stmt->bind_param("sssssss", $nama, $gelar, $lulusan, $email, $telp, $tanggal_input, $nik);
+        $stmt->bind_param("sssssss", $nama, $gelar, $lulusan, $email, $telp, $tanggal_input, $user_input, $nik);
         if (!$stmt->execute()) {
             $error = "Data dosen gagal diupdate! " . $stmt->error;
         } else {
