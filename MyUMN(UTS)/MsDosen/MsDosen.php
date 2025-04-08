@@ -29,8 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $tanggal_input = date('Y-m-d H:i:s');
     
     if ($isEdit) {
-        $stmt = $con->prepare("UPDATE dosen SET Nama = ?, Gelar = ?, Lulusan = ?, email = ?, Telp = ?, User_Input = ?, Tanggal_Input = ? WHERE NIK = ?");
-        $stmt->bind_param("ssssssss", $nama, $gelar, $lulusan, $email, $telp, $tanggal_input, $user_input, $nik);
+        $stmt = $con->prepare("UPDATE dosen SET nama = ?, gelar = ?, lulusan = ?, email = ?, no_telp = ?, user_input = ?, tanggal_input = ? WHERE NIK = ?");
+        $stmt->bind_param("ssssssss", $nama, $gelar, $lulusan, $email, $telp, $user_input, $tanggal_input, $nik);
         if (!$stmt->execute()) {
             $error = "Data dosen gagal diupdate! " . $stmt->error;
         } else {
