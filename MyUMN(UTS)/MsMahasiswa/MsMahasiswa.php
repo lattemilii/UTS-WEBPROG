@@ -58,12 +58,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $tanggal_input = date('Y-m-d H:i:s');
 
     if ($isEdit) {
-        
-        $emailBaru = generateEmail($nama, $con);
-    
+        $stmt = $con->prepare("SELECT nama, email FROM mahasiswa WHERE NIM = ?");
+        $stmt->bind_param("s", $nim);
+        $stmt->execute();
+        $stmt->bind_result($oldNama, $oldEmail);
+        $stmt->fetch();
+        $stmt->close();
+
+        if(strtolower(trim($oldNama)) !== strtolower(trim($nama))){
+            $emailNew = generateEmail($nama, $con);
+            $stmt = $con->prepare("SELECT COUNT (*) FROM users WHERE email = ?");
+            $stmt->bind_param("ss", $emailNew, $nim);
+            $stmt->execute();
+            $stmt->bind_result($count);
+            $stmt->fetch();
+            $stmt->close();
+
+            while($count > 0){
+                $emailNew = generateEmail($nama, $con);
+                $stmt = $con->prepare("SELECT COUNT (*) FROM users WHERE email = ? AND NIM != ?");
+                $stmt->bind_param("ss", $emailNew, $nim);
+                $stmt->execute();
+                $stmt->bind_result($count);
+                $stmt->fetch();
+                $stmt->close();
+            }
+        } else {
+            $emailNew = $oldEmail;
+        }    
         
         $stmt = $con->prepare("UPDATE mahasiswa SET nama=?, tahun_masuk=?, DOB=?, prodi=?, alamat=?, no_telp=?, email=? WHERE NIM=?");
-        $stmt->bind_param("ssssssss", $nama, $tahun_masuk, $dob, $prodi, $alamat, $telp, $emailBaru, $nim);
+        $stmt->bind_param("ssssssss", $nama, $tahun_masuk, $dob, $prodi, $alamat, $telp, $emailNew, $nim);
         if (!$stmt->execute()) {
             $error = "Data mahasiswa gagal diupdate! " . $stmt->error;
         }
@@ -71,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
         
         $stmt = $con->prepare("UPDATE users SET email=? WHERE NIM=?");
-        $stmt->bind_param("ss", $emailBaru, $nim);
+        $stmt->bind_param("ss", $emailNew, $nim);
         $stmt->execute();
         $stmt->close();
     

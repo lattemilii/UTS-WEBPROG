@@ -57,10 +57,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $tanggal_input = date('Y-m-d H:i:s');
     
     if ($isEdit) {
-        $emailNew = generateEmailFromName($nama, $con);
+        $stmt = $con->prepare("SELECT nama, email FROM dosen WHERE NIK = ?");
+        $stmt->bind_param("s", $nik);
+        $stmt->execute();
+        $stmt->bind_result($oldNama, $oldEmail);
+        $stmt->fetch();
+        $stmt->close();
 
-        $stmt = $con->prepare("UPDATE dosen SET nama = ?, gelar = ?, lulusan = ?, email = ?, no_telp = ?, user_input = ?, tanggal_input = ? WHERE NIK = ?");
-        $stmt->bind_param("ssssssss", $nama, $gelar, $lulusan, $emailNew, $telp, $user_input, $tanggal_input, $nik);
+        if(strtolower(trim($oldNama)) !== strtolower(trim($nama))){
+            $emailNew = generateEmailFromName($nama, $con);
+            $stmt = $con->prepare("SELECT COUNT (*) FROM users WHERE email = ?");
+            $stmt->bind_param("ss", $emailNew, $nik);
+            $stmt->execute();
+            $stmt->bind_result($count);
+            $stmt->fetch();
+            $stmt->close();
+
+            while($count > 0){
+                $emailNew = generateEmailFromName($nama, $con);
+                $stmt = $con->prepare("SELECT COUNT (*) FROM users WHERE email = ? AND NIK != ?");
+                $stmt->bind_param("ss", $emailNew, $nik);
+                $stmt->execute();
+                $stmt->bind_result($count);
+                $stmt->fetch();
+                $stmt->close();
+            }
+        } else {
+            $emailNew = $oldEmail;
+        }
+
+        $stmt = $con->prepare("UPDATE dosen SET nama = ?, DOB = ?, gelar = ?, lulusan = ?, email = ?, no_telp = ?, user_input = ?, tanggal_input = ? WHERE NIK = ?");
+        $stmt->bind_param("sssssssss", $nama, $dob, $gelar, $lulusan, $emailNew, $telp, $user_input, $tanggal_input, $nik);
         if (!$stmt->execute()) {
             $error = "Data dosen gagal diupdate! " . $stmt->error;
         } else {
