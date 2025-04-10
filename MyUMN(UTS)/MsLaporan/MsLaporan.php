@@ -65,21 +65,21 @@ function calculateTimeRange($startTime, $sks) {
 <body>
 <div class="container">
     <div class="navbar">
-            <div class="navbar-left">
-                <div class="logo">
-                    <img src="../assets/UMN.png" alt="UMN Logo">
-                </div>
-                <div class="links">
-                    <a href="../MainMenu/MainMenu.php">Menu</a>
-                </div>
+        <div class="navbar-left">
+            <div class="logo">
+                <img src="../assets/UMN.png" alt="UMN Logo">
             </div>
-            <div class="profile">
-                <span><?php echo htmlspecialchars($name); ?></span>
-                <div class="avatar">
-                    <img src="../assets/profile-picture.png" alt="Profile Picture">
-                </div>
+            <div class="links">
+                <a href="../MainMenu/MainMenu.php">Menu</a>
             </div>
         </div>
+        <div class="profile">
+            <span><?php echo htmlspecialchars($name); ?></span>
+            <div class="avatar">
+                <img src="../assets/profile-picture.png" alt="Profile Picture">
+            </div>
+        </div>
+    </div>
 
     <h1 class="judul">Report</h1>
     <div class="table-container">
@@ -105,16 +105,29 @@ function calculateTimeRange($startTime, $sks) {
                 <?php else: ?>
                     <?php foreach ($jadwal as $j): ?>
                         <tr>
-                            <td><?= htmlspecialchars($j['Kode_Matkul']); ?></td>
-                            <td><?= htmlspecialchars($j['Nama_Matkul']); ?></td>
-                            <td><?= htmlspecialchars($j['sks']); ?></td>
-                            <td><?= htmlspecialchars($j['Hari_Matkul']); ?></td>
+<<<<<<< HEAD
+                            <td><?php echo htmlspecialchars($j['Kode_Matkul']); ?></td>
+                            <td><?php echo htmlspecialchars($j['nama_matkul']); ?></td>
+                            <td><?php echo htmlspecialchars($j['sks']); ?></td>
+                            <td><?php echo htmlspecialchars($j['hari_matkul']); ?></td>
                             <td>
-                                <?= calculateTimeRange($j['Jam_Matkul'], $j['sks']); ?>
+                                <?php echo calculateTimeRange($j['jam_matkul'], $j['sks']); ?>
                             </td>
-                            <td><?= htmlspecialchars($j['Ruangan']); ?></td>
-                            <?php if ($role == 'mahasiswa' && isset($j['Nama_dosen'])): ?>
-                                <td><?= htmlspecialchars($j['Nama_dosen']); ?></td>
+                            <td><?php echo htmlspecialchars($j['ruangan']); ?></td>
+                            <?php if ($role == 'mahasiswa' && isset($j['nama_dosen'])): ?>
+                                <td><?php echo htmlspecialchars($j['nama_dosen']); ?></td>
+=======
+                            <td><?= htmlspecialchars($j['Kode_Matkul']); ?></td>
+                            <td><?= htmlspecialchars($j['nama_matkul']); ?></td>
+                            <td><?= htmlspecialchars($j['sks']); ?></td>
+                            <td><?= htmlspecialchars($j['hari_matkul']); ?></td>
+                            <td>
+                                <?= calculateTimeRange($j['jam_matkul'], $j['sks']); ?>
+                            </td>
+                            <td><?= htmlspecialchars($j['ruangan']); ?></td>
+                            <?php if ($role == 'mahasiswa' && isset($j['nama_dosen'])): ?>
+                                <td><?= htmlspecialchars($j['nama_dosen']); ?></td>
+>>>>>>> ac82cd8adf67b6f017cdea28987f7eabbd3bd9c8
                             <?php endif; ?>
                         </tr>
                     <?php endforeach; ?>
