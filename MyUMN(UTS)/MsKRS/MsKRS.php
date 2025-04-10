@@ -32,8 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $tanggal_input = date('Y-m-d H:i:s');
 
     if ($isEdit) {
-        $stmt = $con->prepare("UPDATE krs SET NIK_Dosen = ?, NIM_Mahasiswa = ?, Hari_Matkul = ?, Ruangan = ?, User_Input = ?, Tanggal_Input = ? WHERE Kode_Matkul = ?");
-        $stmt->bind_param("sssssss", $nik_dosen, $nim_mahasiswa, $hari_matkul, $ruangan, $user_input, $tanggal_input, $kode_matkul);
+        $stmt = $con->prepare("UPDATE krs SET NIK_Dosen = ?, NIM_Mahasiswa = ?, hari_matkul = ?, jam_matkul = ?, ruangan = ?, user_input = ?, tanggal_input = ? WHERE Kode_Matkul = ?");
+        $stmt->bind_param("ssssssss", $nik_dosen, $nim_mahasiswa, $hari_matkul, $jam_matkul, $ruangan, $user_input, $tanggal_input, $kode_matkul);
         if ($stmt->execute()) {
             header("Location: MsKRS.php");
             exit();
@@ -69,7 +69,6 @@ $result = $con->query("
 ");
 $krs = $result->fetch_all(MYSQLI_ASSOC);
 
-
 function calculateTimeRange($startTime, $sks) {
     $start = new DateTime($startTime);
     $end = clone $start;
@@ -87,128 +86,122 @@ function calculateTimeRange($startTime, $sks) {
     <link rel="stylesheet" href="MsKRS.css">
 </head>
 <body>
-    <div class="container">
-        <?php if (!empty($error)): ?>
-            <div class="floating-alert show" id="notifBox"><?= htmlspecialchars($error) ?></div>
-        <?php endif; ?>
+<div class="container">
+    <?php if (!empty($error)): ?>
+        <div class="floating-alert show" id="notifBox"><?= htmlspecialchars($error) ?></div>
+    <?php endif; ?>
 
-        <div class="navbar">
-            <div class="navbar-left">
-                <div class="logo">
-                    <img src="../assets/UMN.png" alt="UMN Logo">
-                </div>
-                <div class="links">
-                    <a href="../MainMenu/MainMenu.php">Menu</a>
-                </div>
+    <div class="navbar">
+        <div class="navbar-left">
+            <div class="logo">
+                <img src="../assets/UMN.png" alt="UMN Logo">
             </div>
-            <div class="profile">
-                <span><?php echo htmlspecialchars($name); ?></span>
-                <div class="avatar">
-                    <img src="../assets/profile-picture.png" alt="Profile Picture">
-                </div>
+            <div class="links">
+                <a href="../MainMenu/MainMenu.php">Menu</a>
             </div>
         </div>
+        <div class="profile">
+            <span><?php echo htmlspecialchars($name); ?></span>
+            <div class="avatar">
+                <img src="../assets/profile-picture.png" alt="Profile Picture">
+            </div>
+        </div>
+    </div>
 
-        <h1 class="judul">KRS</h1>
-        <div class="table-container">
-            <table>
-                <thead>
+    <h1 class="judul">KRS</h1>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Kode Matkul</th>
+                    <th>NIK Dosen</th>
+                    <th>NIM Mahasiswa</th>
+                    <th>Hari Matkul</th>
+                    <th>Ruangan</th>
+                    <th>Jam</th>
+                    <th>User Input</th>
+                    <th>Tanggal Input</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($krs as $k): ?>
                     <tr>
-                        <th>Kode Matkul</th>
-                        <th>NIK Dosen</th>
-                        <th>NIM Mahasiswa</th>
-                        <th>Hari Matkul</th>
-                        <th>Ruangan</th>
-                        <th>Jam</th>
-                        <th>User Input</th>
-                        <th>Tanggal Input</th>
-                        <th>Aksi</th>
+                        <td><?php echo htmlspecialchars($k['Kode_Matkul']); ?></td>
+                        <td><?php echo htmlspecialchars($k['NIK_Dosen']); ?></td>
+                        <td><?php echo htmlspecialchars($k['NIM_Mahasiswa']); ?></td>
+                        <td><?php echo htmlspecialchars($k['hari_matkul']); ?></td>
+                        <td><?php echo htmlspecialchars($k['ruangan']); ?></td>
+                        <td><?php echo calculateTimeRange($k['jam_matkul'], $k['SKS']); ?></td>
+                        <td><?php echo htmlspecialchars($k['user_input']); ?></td>
+                        <td><?php echo htmlspecialchars($k['tanggal_input']); ?></td>
+                        <td>
+                            <button onclick="openEditModal('<?php echo $k['Kode_Matkul']; ?>')">Edit</button>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($krs as $k): ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($k['Kode_Matkul']); ?></td>
-                            <td><?php echo htmlspecialchars($k['NIK_Dosen']); ?></td>
-                            <td><?php echo htmlspecialchars($k['NIM_Mahasiswa']); ?></td>
-                            <td><?php echo htmlspecialchars($k['hari_matkul']); ?></td>
-                            <td><?php echo htmlspecialchars($k['ruangan']); ?></td>
-                            <td>
-                                <?php 
-                                    echo calculateTimeRange($k['jam_matkul'], $k['SKS']); 
-                                ?>
-                            </td>
-                            <td><?php echo htmlspecialchars($k['user_input']); ?></td>
-                            <td><?php echo htmlspecialchars($k['tanggal_input']); ?></td>
-                            <td>
-                                <button onclick="openEditModal('<?php echo $k['Kode_Matkul']; ?>')">Edit</button>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>    
-        <div class="tambah-btn-container">
-            <button id="openModal" class="btn-tambah">Tambah KRS</button>
-        </div>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>    
+    <div class="tambah-btn-container">
+        <button id="openModal" class="btn-tambah">Tambah KRS</button>
     </div>
-
-    <div id="modalTambah" class="modal">
-        <div>
-            <span class="close">&times;</span>
-            <?php include 'TambahKRS.php'; ?>
-        </div>
-    </div>
-
-    <div id="modalEdit" class="modal" style="display: none;">
-        <div id="editFormContainer"></div>
-    </div>
-
 </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var modal = document.getElementById("modalTambah");
-            var btn = document.getElementById("openModal");
-            var span = document.querySelector(".close");
+<div id="modalTambah" class="modal">
+    <div>
+        <span class="close">&times;</span>
+        <?php include 'TambahKRS.php'; ?>
+    </div>
+</div>
 
-            if (btn && modal && span) {
-                btn.addEventListener('click', function () {
-                    modal.style.display = "flex";
-                    document.body.classList.add("modal-open");
-                });
+<div id="modalEdit" class="modal" style="display: none;">
+    <div id="editFormContainer"></div>
+</div>
 
-                span.addEventListener('click', function () {
-                    modal.style.display = "none";
-                    document.body.classList.remove("modal-open");
-                });
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var modal = document.getElementById("modalTambah");
+    var btn = document.getElementById("openModal");
+    var span = document.querySelector(".close");
 
-                window.addEventListener('click', function (event) {
-                    if (event.target == modal) {
-                        modal.style.display = "none";
-                        document.body.classList.remove("modal-open");
-                    }
-                });
-            }
-        
-            const modalEdit = document.getElementById("modalEdit");
-            const editFormContainer = document.getElementById("editFormContainer");
-
-            window.openEditModal = function(kodeMatkul) {
-                fetch("EditKRS.php?kode_matkul=" + kodeMatkul)
-                    .then(res => res.text())
-                    .then(html => {
-                        editFormContainer.innerHTML = html;
-                        modalEdit.style.display = "flex";
-                        document.body.classList.add("modal-open");
-                    });
-            };
+    if (btn && modal && span) {
+        btn.addEventListener('click', function () {
+            modal.style.display = "flex";
+            document.body.classList.add("modal-open");
         });
 
-    const notif = document.getElementById('notifBox');
-    if (notif) {
-        setTimeout(() => notif.classList.remove('show'), 4000);
+        span.addEventListener('click', function () {
+            modal.style.display = "none";
+            document.body.classList.remove("modal-open");
+        });
+
+        window.addEventListener('click', function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+                document.body.classList.remove("modal-open");
+            }
+        });
     }
-    </script>
+
+    const modalEdit = document.getElementById("modalEdit");
+    const editFormContainer = document.getElementById("editFormContainer");
+
+    window.openEditModal = function(kodeMatkul) {
+        fetch("EditKRS.php?kode_matkul=" + kodeMatkul)
+            .then(res => res.text())
+            .then(html => {
+                editFormContainer.innerHTML = html;
+                modalEdit.style.display = "flex";
+                document.body.classList.add("modal-open");
+            });
+    };
+});
+
+const notif = document.getElementById('notifBox');
+if (notif) {
+    setTimeout(() => notif.classList.remove('show'), 4000);
+}
+</script>
 </body>
 </html>
