@@ -105,7 +105,6 @@ function calculateTimeRange($startTime, $sks) {
                 <?php else: ?>
                     <?php foreach ($jadwal as $j): ?>
                         <tr>
-<<<<<<< HEAD
                             <td><?php echo htmlspecialchars($j['Kode_Matkul']); ?></td>
                             <td><?php echo htmlspecialchars($j['nama_matkul']); ?></td>
                             <td><?php echo htmlspecialchars($j['sks']); ?></td>
@@ -116,18 +115,6 @@ function calculateTimeRange($startTime, $sks) {
                             <td><?php echo htmlspecialchars($j['ruangan']); ?></td>
                             <?php if ($role == 'mahasiswa' && isset($j['nama_dosen'])): ?>
                                 <td><?php echo htmlspecialchars($j['nama_dosen']); ?></td>
-=======
-                            <td><?= htmlspecialchars($j['Kode_Matkul']); ?></td>
-                            <td><?= htmlspecialchars($j['nama_matkul']); ?></td>
-                            <td><?= htmlspecialchars($j['sks']); ?></td>
-                            <td><?= htmlspecialchars($j['hari_matkul']); ?></td>
-                            <td>
-                                <?= calculateTimeRange($j['jam_matkul'], $j['sks']); ?>
-                            </td>
-                            <td><?= htmlspecialchars($j['ruangan']); ?></td>
-                            <?php if ($role == 'mahasiswa' && isset($j['nama_dosen'])): ?>
-                                <td><?= htmlspecialchars($j['nama_dosen']); ?></td>
->>>>>>> ac82cd8adf67b6f017cdea28987f7eabbd3bd9c8
                             <?php endif; ?>
                         </tr>
                     <?php endforeach; ?>
